@@ -8,8 +8,8 @@ export interface TableListItem {
   desc: string;
   callNo: number;
   status: number;
-  updatedAt: Date;
-  createdAt: Date;
+  updatedAt: string;
+  createdAt: string;
   progress: number;
 }
 

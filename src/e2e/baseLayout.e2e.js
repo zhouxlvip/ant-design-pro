@@ -1,14 +1,25 @@
-const { uniq } = require('lodash');
 const RouterConfig = require('../../config/config').default.routes;
 
 const BASE_URL = `http://localhost:${process.env.PORT || 8000}`;
+
+async function doSomethingInSeries(timeout) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, timeout);
+  });
+}
 
 function formatter(routes, parentPath = '') {
   const fixedParentPath = parentPath.replace(/\/{1,}/g, '/');
   let result = [];
   routes.forEach((item) => {
-    if (item.path) {
-      result.push(`${fixedParentPath}/${item.path}`.replace(/\/{1,}/g, '/'));
+    if (item.path && !item.redirect && !item.routes) {
+      if (item.path.startsWith('/')) {
+        result.push(item.path);
+      } else {
+        result.push(`${fixedParentPath}/${item.path}`.replace(/\/{1,}/g, '/'));
+      }
     }
     if (item.routes) {
       result = result.concat(
@@ -16,7 +27,7 @@ function formatter(routes, parentPath = '') {
       );
     }
   });
-  return uniq(result.filter((item) => !!item));
+  return Array.from(new Set(result.filter((item) => !!item)));
 }
 
 beforeEach(async () => {
@@ -32,9 +43,16 @@ describe('Ant Design Pro E2E test', () => {
     await page.waitForSelector('footer', {
       timeout: 2000,
     });
+
     const haveFooter = await page.evaluate(
       () => document.getElementsByTagName('footer').length > 0,
     );
+
+    await doSomethingInSeries(2000);
+
+    const image = await page.fullPageScreenshot();
+    expect(image).toMatchImageSnapshot();
+
     expect(haveFooter).toBeTruthy();
   };
 
@@ -52,6 +70,8 @@ describe('Ant Design Pro E2E test', () => {
     const haveFooter = await page.evaluate(
       () => document.getElementsByTagName('footer').length > 0,
     );
+    const image = await page.fullPageScreenshot();
+    expect(image).toMatchImageSnapshot();
     expect(haveFooter).toBeTruthy();
   });
 });

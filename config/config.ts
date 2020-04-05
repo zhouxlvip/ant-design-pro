@@ -66,9 +66,12 @@ export default defineConfig({
               path: '/admin',
               name: 'admin',
               icon: 'crown',
-              component: './Admin',
               authority: ['admin'],
               routes: [
+                {
+                  path: '/admin',
+                  redirect: '/admin/sub-page',
+                },
                 {
                   path: '/admin/sub-page',
                   name: 'sub-page',
